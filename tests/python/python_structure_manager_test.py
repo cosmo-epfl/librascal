@@ -1,4 +1,4 @@
-import ase.io
+from ase.io import read
 from ase.build import molecule
 from rascal.neighbourlist import get_neighbourlist, AtomsList
 from rascal.neighbourlist.structure_manager import (
@@ -164,6 +164,32 @@ class TestNL(unittest.TestCase):
                     dist = np.linalg.norm(neigh.position - center.position)
 
 
+class TestNLsanitation(unittest.TestCase):
+    def setUp(self):
+        """
+        test that improper structures are sanitized by the
+        """
+
+        self.frames = []
+        # methane.xyz is not inside the unit cell and is not periodic
+        # dummy_structure.json is periodic but not inside the unitcell
+        fns = ["methane.xyz", "dummy_structure.json"]
+        for fn in fns:
+            self.frames += [read(os.path.join(inputs_path, fn))]
+
+        self.cutoff = 3.0
+        self.nl_options = [
+            dict(name="centers", args=dict()),
+            dict(name="neighbourlist", args=dict(cutoff=self.cutoff)),
+            dict(name="strict", args=dict(cutoff=self.cutoff)),
+        ]
+
+    def test_sanitation(self):
+        for frame in self.frames:
+            # it should not raise errors
+            _ = AtomsList(frame, self.nl_options)
+
+
 class TestNLStrict(unittest.TestCase):
     def setUp(self):
         """
@@ -318,7 +344,7 @@ class CenterSelectTest(unittest.TestCase):
 
     def setUp(self):
         filename = "reference_data/inputs/small_molecule.json"
-        self.frame = ase.io.read(filename)
+        self.frame = read(filename)
         self.natoms = len(self.frame)
 
     def get_mask(self):

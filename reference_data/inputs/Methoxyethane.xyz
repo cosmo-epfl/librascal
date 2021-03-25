@@ -1,5 +1,5 @@
 12
-Lattice="10.0 0.0 0.0 0.0 10.0 0.0 0.0 0.0 10.0" Properties=species:S:1:pos:R:3 309=T #=T cellangstrom=T 14.46900=T Bead:=T positionsangstrom=T CELLabcABC:=T 0=T 99.79000=T 90.00000=T 6.54200=T 13.41500=T Step:=T pbc="T T T"
+Lattice="10.0 0.0 0.0 0.0 10.0 0.0 0.0 0.0 10.0" Properties=species:S:1:pos:R:3 309=T pbc="F F F"
 O      -0.04901667       0.86314167       0.00512500
 C      -0.02961667      -0.56575833      -0.00277500
 C      -1.46501667      -1.09525833       0.00812500
