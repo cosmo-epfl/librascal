@@ -10,6 +10,7 @@ _neighbourlist_list = [
     "maxorder",
     "halflist",
     "fulllist",
+    "kspace",
 ]
 
 # names of existing neighbourlist implementation on the pybinding site.

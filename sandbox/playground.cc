@@ -43,6 +43,7 @@
 #include "rascal/structure_managers/make_structure_manager.hh"
 #include "rascal/structure_managers/structure_manager_centers.hh"
 #include "rascal/structure_managers/structure_manager_collection.hh"
+#include "rascal/structure_managers/adaptor_kspace.hh"
 
 #include <cmath>
 #include <functional>
@@ -59,8 +60,7 @@
 using namespace rascal;  // NOLINT
 
 using ManagerTypeHolder_t = StructureManagerTypeHolder<
-                      StructureManagerCenters, AdaptorNeighbourList,
-                          AdaptorCenterContribution, AdaptorStrict>;
+                      StructureManagerCenters, AdaptorKspace>;
 
 using Manager_t = typename ManagerTypeHolder_t::type;
 using Representation_t = CalculatorSphericalInvariants;
@@ -111,39 +111,70 @@ int main(int argc, char * argv[]) {
   json adaptors = input["adaptors"].get<json>();
   json calculator = input["calculator"].get<json>();
   SparseKernel kernel{input["kernel"]};
+
   ManagerCollection_t managers{adaptors};
+
   managers.add_structures(filename, 0, input["n_structures"].get<int>());
-  Representation_t representation{calculator};
-  auto N_ITERATIONS{input["N_ITERATIONS"].get<int>()};
-  representation.compute(managers);
 
-  SparsePointsBlockSparse<Representation_t> sparse_points{};
+  for (auto manager : managers) {
+    std::cout << "Nb neigh: " << manager->get_nb_clusters(2) << std::endl;
+    for (auto center : manager) {
+      int atom_tag = center.get_atom_tag();
+      int atom_type = center.get_atom_type();
+      auto pos = center.get_position();
+      std::cout << "tag: " <<atom_tag
+                << " type: " << atom_type
+                << " pos: " << pos.transpose()
+                << std::endl;
+    }
 
-  auto selected_ids = input["selected_ids"].get<std::vector<std::vector<int>>>();
+    std::cout << std::endl;
+    for (auto center : manager) {
+      for (auto neigh : center.pairs()) {
+        int atom_tag = neigh.get_atom_tag();
+        int atom_type = neigh.get_atom_type();
+        auto pos = neigh.get_position();
+        auto atom_j = neigh.get_atom_j();
+        std::cout << "tag: " <<atom_tag
+                << " type: " << atom_type
+                << " atom_j: " << atom_j.get_atom_tag()
+                << " pos: " << pos.transpose()
+                << std::endl;
+      }
+    }
 
-  sparse_points.push_back(representation, managers, selected_ids);
-  auto KNM_der{kernel.compute_derivative(representation, managers, sparse_points)};
-  math::Vector_t elapsed{N_ITERATIONS};
-  Timer timer{};
-
-  for (int looper{0}; looper < N_ITERATIONS; looper++) {
-    timer.reset();
-    auto KNM_der_{kernel.compute_derivative(representation, managers, sparse_points)};
-    elapsed[looper] = timer.elapsed();
-    KNM_der_(0,0) = 1;
   }
-  std::cout << elapsed.mean() << ", "<<std_dev(elapsed) << std::endl;
+  // Representation_t representation{calculator};
+  // auto N_ITERATIONS{input["N_ITERATIONS"].get<int>()};
+  // representation.compute(managers);
 
-  json results{};
-  results["elapsed_mean"] = elapsed.mean();
-  results["elapsed_std"] = std_dev(elapsed);
-  results["elapsed"] = elapsed;
-  std::ofstream o(argv[2]);
-  o << std::setw(2) << results << std::endl;
+  // SparsePointsBlockSparse<Representation_t> sparse_points{};
+
+  // auto selected_ids = input["selected_ids"].get<std::vector<std::vector<int>>>();
+
+  // sparse_points.push_back(representation, managers, selected_ids);
+  // auto KNM_der{kernel.compute_derivative(representation, managers, sparse_points)};
+  // math::Vector_t elapsed{N_ITERATIONS};
+  // Timer timer{};
+
+  // for (int looper{0}; looper < N_ITERATIONS; looper++) {
+  //   timer.reset();
+  //   auto KNM_der_{kernel.compute_derivative(representation, managers, sparse_points)};
+  //   elapsed[looper] = timer.elapsed();
+  //   KNM_der_(0,0) = 1;
+  // }
+  // std::cout << elapsed.mean() << ", "<<std_dev(elapsed) << std::endl;
+
+  // json results{};
+  // results["elapsed_mean"] = elapsed.mean();
+  // results["elapsed_std"] = std_dev(elapsed);
+  // results["elapsed"] = elapsed;
+  // std::ofstream o(argv[2]);
+  // o << std::setw(2) << results << std::endl;
 
   // make playground -j4 && sandbox/playground ../sandbox/soap_input_molecular_crystal.json ../sandbox/res_ref.json
   // clear && make -j4 test_sparse_kernels  && ctest -R "test_sparse_kernels*" -V
-  
+
   // auto KNM_num_der{compute_numerical_kernel_gradients(kernel, representation, managers, sparse_points, input["h"].get<double>())};
   // auto diff = math::relative_error(KNM_der, KNM_num_der);
 
