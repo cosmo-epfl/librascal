@@ -7,17 +7,23 @@ from rascal.utils import (
     get_radial_basis_pca,
     get_radial_basis_projections,
     get_optimal_radial_basis_hypers,
+    json_dumps_frame,
 )
+from rascal.lib import neighbour_list
+from rascal.neighbourlist import base
 
 from test_utils import load_json_frame, BoxList, Box, dot
+import tempfile
 import unittest
 import numpy as np
 import sys
 import os
 import json
+import tempfile
 from copy import copy, deepcopy
 from scipy.stats import ortho_group
 import pickle
+import ase.io
 
 rascal_reference_path = "reference_data"
 inputs_path = os.path.join(rascal_reference_path, "inputs")
@@ -91,3 +97,37 @@ class TestOptimalRadialBasis(unittest.TestCase):
         soap_feats_2 = soap_opt_2.transform(self.frames).get_features(soap_opt_2)
 
         self.assertTrue(np.allclose(soap_feats, soap_feats_2))
+
+
+class TestIO(unittest.TestCase):
+    def setUp(self):
+        self.fns = [
+            os.path.join(inputs_path, "CaCrP2O7_mvc-11955_symmetrized.json"),
+            os.path.join(inputs_path, "SiC_moissanite_supercell.json"),
+            os.path.join(inputs_path, "methane.json"),
+        ]
+
+    def test_json_dumps_frame(self):
+        """
+        Checks if json file decoded by RascalEncoder in dumps_frame can be read
+        by rascal
+        """
+        nl_options = [
+            dict(name="centers", args=dict()),
+            dict(name="neighbourlist", args=dict(cutoff=3)),
+            dict(name="centercontribution", args=dict()),
+            dict(name="strict", args=dict(cutoff=3)),
+        ]
+        managers = base.StructureCollectionFactory(nl_options)
+        for fn in self.fns:
+            frame = ase.io.read(fn)
+            dumped_json = json_dumps_frame(frame)
+            tmp = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+            tmp.write(dumped_json)
+            try:
+                managers.add_structures(tmp.name)
+                tmp.close()
+                os.unlink(tmp.name)
+            except:
+                tmp.close()
+                os.unlink(tmp.name)

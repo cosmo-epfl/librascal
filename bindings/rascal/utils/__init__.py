@@ -6,6 +6,7 @@ from .io import (
     get_supported_io_versions,
     dump_obj,
     load_obj,
+    json_dumps_frame,
 )
 
 # Warning potential dependency loop: FPS imports models, which imports KRR,

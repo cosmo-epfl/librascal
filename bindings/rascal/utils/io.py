@@ -3,6 +3,7 @@ import importlib
 from collections import Iterable
 import numpy as np
 import json
+import datetime
 from copy import deepcopy
 from abc import ABC, abstractmethod
 
@@ -422,3 +423,58 @@ def _load_npy(data, path):
             if len(v) == 2:
                 if "npy" == v[0]:
                     data[k] = np.array(v[1])
+
+
+class RascalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, "todict"):
+            d = obj.todict()
+
+            if not isinstance(d, dict):
+                raise RuntimeError(
+                    "todict() of {} returned object of type {} "
+                    "but should have returned dict".format(obj, type(d))
+                )
+            if hasattr(obj, "ase_objtype"):
+                d["__ase_objtype__"] = obj.ase_objtype
+
+            return d
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.bool_):
+            return bool(obj)
+        if isinstance(obj, datetime.datetime):
+            return {"__datetime__": obj.isoformat()}
+        if isinstance(obj, complex):
+            return {"__complex__": (obj.real, obj.imag)}
+        return json.JSONEncoder.default(self, obj)
+
+
+def json_dumps_frame(frames, **json_dumps_kwargs):
+    """Serialize frames to a JSON formatted string.
+
+    Parameters
+    ----------
+    frames : list(ase.Atoms) or ase.Atoms
+        List of atomic structures (or single one) to be dumped to a json
+
+    json_dumps_kwargs : dict
+        List of arguments forwarded to json.dumps
+
+    Return
+    ------
+    T
+    """
+    if type(frames) is not list:
+        frames = [frames]
+
+    json_frames = {}
+    for i, frame in enumerate(frames):
+        json_frames[str(i)] = json.loads(json.dumps(frame, cls=RascalEncoder))
+
+    json_frames["ids"] = list(range(len(frames)))
+    json_frames["nextid"] = len(frames)
+
+    return json.dumps(json_frames, **json_dumps_kwargs)
