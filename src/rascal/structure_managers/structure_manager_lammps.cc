@@ -36,7 +36,7 @@ namespace rascal {
   void StructureManagerLammps::update_self(int inum, int tot_num, int * ilist,
                                            int * numneigh, int ** firstneigh,
                                            double ** x, double ** f, int * type,
-                                           double * eatom, double ** vatom) {
+                                           double * eatom, double ** vatom, std::vector<int> atom_types) {
     // setting the class variables
     this->inum = inum;
     this->tot_num = tot_num;
@@ -48,15 +48,21 @@ namespace rascal {
     this->type = type;
     this->eatom = eatom;
     this->vatom = vatom;
+    std::cout << "atom_types.size() " << atom_types.size() << std::endl;
+    this->atom_types = atom_types;
     this->offsets.reserve(inum);
     this->offsets.resize(1);
+    std::cout << "atom_index_from_atom_tag_list() " << std::endl;
     this->atom_index_from_atom_tag_list.clear();
     // #BUG8486@(all) it should be this->inum
+    std::cout << "offsets " << std::endl;
     for (int i{0}; i < this->inum; ++i) {
       this->offsets.emplace_back(this->offsets[i] + this->numneigh[i]);
     }
+    std::cout << "nb pairs" << std::endl;
     this->nb_pairs = std::accumulate(numneigh, numneigh + this->inum, 0);
 
+    std::cout << "cluster indices" << std::endl;
     auto & atom_cluster_indices{std::get<0>(this->cluster_indices_container)};
     auto & pair_cluster_indices{std::get<1>(this->cluster_indices_container)};
 
@@ -66,8 +72,10 @@ namespace rascal {
     // have 5000 elements.
     // Also the dummy 0 values which will could undefined behaviour instead
     // necessary an error
+    std::cout << "make atom" << std::endl;
     this->make_atom_index_from_atom_tag_list();
 
+    std::cout << "fill " << std::endl;
     atom_cluster_indices.fill_sequence();
     pair_cluster_indices.fill_sequence();
   }

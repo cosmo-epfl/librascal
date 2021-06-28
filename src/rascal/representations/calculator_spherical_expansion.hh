@@ -2158,26 +2158,26 @@ namespace rascal {
               << "center_atoms_mask should not mask atoms.";
       throw std::runtime_error(err_str.str());
     }
-    auto manager_root = extract_underlying_manager<0>(manager);
-    auto cell_length = manager_root->get_cell_length();
-    auto pbc = manager_root->get_periodic_boundary_conditions();
-    bool is_cutoff_too_large{false};
-    for (size_t i_dim{0}; i_dim < ThreeD; ++i_dim) {
-      if (pbc[i_dim]) {
-        if (cell_length[i_dim] < 2. * this->interaction_cutoff) {
-          is_cutoff_too_large = true;
-        }
-      }
-    }
-    if (IsHalfNL and is_cutoff_too_large) {
-      std::stringstream err_str{};
-      err_str << "Half neighbor list should only be used when the diameter of "
-              << "the spherical expansion is smaller than the unit cell "
-              << "in periodic directions: "
-              << "[" << cell_length.transpose() << "] > "
-              << 2 * this->interaction_cutoff;
-      throw std::runtime_error(err_str.str());
-    }
+    //auto manager_root = extract_underlying_manager<0>(manager);
+    //auto cell_length = manager_root->get_cell_length();
+    //auto pbc = manager_root->get_periodic_boundary_conditions();
+    //bool is_cutoff_too_large{false};
+    //for (size_t i_dim{0}; i_dim < ThreeD; ++i_dim) {
+    //  if (pbc[i_dim]) {
+    //    if (cell_length[i_dim] < 2. * this->interaction_cutoff) {
+    //      is_cutoff_too_large = true;
+    //    }
+    //  }
+    //}
+    //if (IsHalfNL and is_cutoff_too_large) {
+    //  std::stringstream err_str{};
+    //  err_str << "Half neighbor list should only be used when the diameter of "
+    //          << "the spherical expansion is smaller than the unit cell "
+    //          << "in periodic directions: "
+    //          << "[" << cell_length.transpose() << "] > "
+    //          << 2 * this->interaction_cutoff;
+    //  throw std::runtime_error(err_str.str());
+    //}
 
     auto && expansions_coefficients{*manager->template get_property<Prop_t>(
         this->get_name(), true, true, ExcludeGhosts)};
