@@ -257,6 +257,17 @@ namespace rascal {
       for (auto center : manager) {
         // accumulate partial gradients onto gradients
         for (auto neigh : center.pairs_with_self_pair()) {
+          //std::cout << "neigh.get_atom_j() " << neigh.get_atom_j().get_atom_tag() << std::endl;
+          //std::cout << pair_grad_atom_i_r_j[neigh].rows() << " " << pair_grad_atom_i_r_j[neigh].cols() << std::endl;
+          //std::cout << pair_grad_atom_i_r_j[neigh] << std::endl;
+          //std::cout << gradients[neigh.get_atom_j()].rows() << " " << gradients[neigh.get_atom_j()].cols() << std::endl;
+          //std::cout << gradients[neigh.get_atom_j()] << std::endl; // TODO(alex) valgrind says here is memory leak
+          //std::cout << "pair (" << center.get_atom_tag() << ", " 
+          //          << neigh.get_atom_tag() << ") global index " 
+          //          << neigh.get_global_index() << ", atom j tag "
+          //          << neigh.get_atom_j().get_atom_tag() << ", atom j cluster index "
+          //          << neigh.get_atom_j().get_cluster_index() << std::endl;  
+
           gradients[neigh.get_atom_j()] += pair_grad_atom_i_r_j[neigh];
         }
       }

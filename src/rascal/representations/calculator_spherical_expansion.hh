@@ -2205,6 +2205,7 @@ namespace rascal {
     expansions_coefficients.clear();
     expansions_coefficients.set_shape(n_row, n_col);
     if (compute_gradients) {
+      // TODO(alex) should not be commented out, only for debugging
       expansions_coefficients_gradient.clear();
       // Row-major ordering, so the Cartesian (spatial) index varies slowest
       expansions_coefficients_gradient.set_shape(ThreeD * n_row, n_col);
@@ -2418,17 +2419,22 @@ namespace rascal {
     std::map<int, int> center_tag2idx{};
     const bool compute_gradients{this->compute_gradients};
     int i_center{0};
+    int j_neigh{0};
     for (auto center : manager) {
       center_tag2idx[center.get_atom_tag()] = i_center;
       i_center++;
-      keys_list.emplace_back();
+      //keys_list.emplace_back();
       if (compute_gradients) {
         for (auto neigh : center.pairs_with_self_pair()) {
-          (void)neigh;  // to avoid compiler warning
-          keys_list_grad.emplace_back();
+          j_neigh++;
+          // TODO(alex) why was this used? seems unnessary complicated?
+          //(void)neigh;  // to avoid compiler warning
+          //keys_list_grad.emplace_back();
         }
       }
     }
+    keys_list.resize(i_center);
+    keys_list_grad.resize(j_neigh);
     int i_grad{0};
     i_center = 0;
     for (auto center : manager) {
@@ -2436,7 +2442,10 @@ namespace rascal {
 
       for (auto neigh : center.pairs()) {
         keys_list[i_center].insert({neigh.get_atom_type()});
-        if (manager->is_center_atom(neigh) and IsHalfNL) {
+        //std::cout << "strict pair (" << center.get_atom_tag() << ", "
+        //  << neigh.get_atom_tag() << ") global index "
+        //  << neigh.get_global_index() << std::endl;
+        if (IsHalfNL && manager->is_center_atom(neigh)) {
           auto atom_j = neigh.get_atom_j();
           auto j_center = center_tag2idx[atom_j.get_atom_tag()];
           keys_list[j_center].insert(center_type);

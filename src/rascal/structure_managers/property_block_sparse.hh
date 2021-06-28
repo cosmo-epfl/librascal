@@ -421,7 +421,11 @@ namespace rascal {
       }
 
       //! clear the map but does not change the underlying data
-      void clear() noexcept { this->map.clear(); }
+      void clear() noexcept { 
+        if (!this->map.empty()) {
+          this->map.clear();
+        }
+      }
 
       VectorMap_Ref_t get_full_vector() {
         return VectorMap_Ref_t(&this->data[this->global_offset],
@@ -799,7 +803,12 @@ namespace rascal {
     //! clear all the content of the property
     void clear() {
       // this->values.resize(0);
-      this->maps.clear();
+      if (!this->maps.empty()) {
+        for (int i{0}; i < this->maps.size(); i++) {
+          this->maps.at(i).clear();
+        }
+        this->maps.clear();
+      }
     }
 
     Manager_t & get_manager() {

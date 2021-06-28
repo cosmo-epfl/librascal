@@ -176,7 +176,8 @@ namespace rascal {
      * global LAMMPS atom tag.
      */
     int get_neighbour_atom_tag(const Parent &, size_t cluster_index) const {
-      return this->ilist[cluster_index];
+      return this->atom_index_from_atom_tag_list.at(cluster_index);
+      //return this->ilist[cluster_index];
     }
 
     // #BUG8486@(all) I do not know how the structure of ilist is implemented,

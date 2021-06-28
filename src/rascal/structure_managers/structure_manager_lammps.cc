@@ -78,6 +78,14 @@ namespace rascal {
     std::cout << "fill " << std::endl;
     atom_cluster_indices.fill_sequence();
     pair_cluster_indices.fill_sequence();
+    //std::cout << "this->atom_tag_list.size() " << this->get_atom_tag_list().size() << std::endl;
+    //for (int i{0}; i < this->tot_num; i++) {
+    //    this->get_atom_tag_list().push_back(i);
+    //}
+
+    //std::vector<int> atom_tag_list{};
+    //.push_back(atom_tag);
+
   }
 
   /* ---------------------------------------------------------------------- */
