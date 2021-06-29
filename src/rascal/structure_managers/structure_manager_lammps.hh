@@ -158,6 +158,17 @@ namespace rascal {
       return this->numneigh[this->get_atom_index(cluster.get_atom_tag())];
     }
 
+    /**
+     * return the atom_tag of the index-th atom in manager parent here is
+     * dummy and is used for consistency in other words, atom_tag is the
+     * global LAMMPS atom tag.
+     */
+    int get_neighbour_atom_tag(const Parent &, size_t cluster_index) const {
+      //return this->atom_index_from_atom_tag_list.at(cluster_index);
+      //return this->ilist[cluster_index];
+      return this->atom_tag_list[cluster_index];
+    }
+
     //! return the index-th neighbour of the last atom in a cluster with
     //! cluster_size = 1 (atoms) which can be used to construct pairs
     template <size_t Order, size_t Layer>
@@ -167,17 +178,8 @@ namespace rascal {
                     "this implementation only handles atoms and identify its "
                     "index-th neighbour.");
       auto && i_atom_id{cluster.back()};
+      //return this->atom_ghost_tag[this->firstneigh[std::move(i_atom_id)][index]];
       return this->firstneigh[std::move(i_atom_id)][index];
-    }
-
-    /**
-     * return the atom_tag of the index-th atom in manager parent here is
-     * dummy and is used for consistency in other words, atom_tag is the
-     * global LAMMPS atom tag.
-     */
-    int get_neighbour_atom_tag(const Parent &, size_t cluster_index) const {
-      return this->atom_index_from_atom_tag_list.at(cluster_index);
-      //return this->ilist[cluster_index];
     }
 
     // #BUG8486@(all) I do not know how the structure of ilist is implemented,
@@ -237,7 +239,9 @@ namespace rascal {
      */
     void update_self(int inum, int tot_num, int * ilist, int * numneigh,
                      int ** firstneigh, double ** x, double ** f, int * type,
-                     double * eatom, double ** vatom, std::vector<int> atom_types);
+                     double * eatom, double ** vatom,
+                     std::vector<int> atom_types,
+                     int * atom_ghost_tag);
 
    protected:
     /**
@@ -266,42 +270,14 @@ namespace rascal {
     double ** vatom{};    //!< virial stress of atoms
     int nb_pairs{};       //! number of clusters with cluster_size=2 (pairs)
     std::vector<int> atom_types{}; //!< lammps atom types to rascal, used as atom_types[type[atom_tag]-1]
+    //int * atom_ghost_tag{};     //!< atom tags (in lammps words: atom ids) corresponding to the atom in the cell
+    std::vector<int> atom_tag_list{};  //! stores i-atom and ghost atom tags
     std::vector<int> offsets{};  //! offset per atom to access neighbour list
 
     // the inverse mapping from the lammps atom index / atom tag (stored in ilist) to rascal atom index
     std::vector<size_t> atom_index_from_atom_tag_list{};
 
    private:
-    void make_atom_index_from_atom_tag_list() {
-      //int max_atomic_index = 0;
-      //std::cout <<  "inum, tot_num " << this->inum << " " << this->tot_num << std::endl;
-      //std::cout << "determine max" << std::endl;
-      //for (int i{0}; i < this->inum; ++i) {
-      //  std::cout << "this->ilist[i] " << i << " " << this->ilist[i] << std::endl;
-      //  if (this->ilist[i] > max_atomic_index) {
-      //    max_atomic_index = this->ilist[i];
-      //  }
-      //}
-      //std::cout << "determined max " << max_atomic_index << std::endl;
-      //! Filling dummy cluster index
-      //this->atom_index_from_atom_tag_list.resize(max_atomic_index + 1);
-      //std::fill(this->atom_index_from_atom_tag_list.begin(), this->atom_index_from_atom_tag_list.end(), -1);
-      //std::cout << "arrange" << std::endl;
-      //std::cout << "this->tot_num " << this->tot_num << std::endl;
-      ////! Replacing dummy values with correct cluster index
-      //for (int i{0}; i < this->inum; ++i) {
-      //  // this->ilist does not have negative atom tags therefore the cast is
-      //  // safe
-      //  this->atom_index_from_atom_tag_list.at(this->ilist[i]) = i;
-      //}
-      this->atom_index_from_atom_tag_list.resize(this->tot_num);
-      for (int i{0}; i < this->tot_num; ++i) {
-        // this->ilist does not have negative atom tags therefore the cast is
-        // safe
-        this->atom_index_from_atom_tag_list.at(i) = i;
-      }
-      std::cout << "arranged" << std::endl;
-    }
   };
 
   /**

@@ -2442,6 +2442,7 @@ namespace rascal {
 
       for (auto neigh : center.pairs()) {
         keys_list[i_center].insert({neigh.get_atom_type()});
+        // TODO(alex) remove after debug finished
         //std::cout << "strict pair (" << center.get_atom_tag() << ", "
         //  << neigh.get_atom_tag() << ") global index "
         //  << neigh.get_global_index() << std::endl;
