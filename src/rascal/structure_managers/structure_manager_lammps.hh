@@ -141,6 +141,8 @@ namespace rascal {
 
     //! get const atom type reference given an atom_tag
     int get_atom_type(int atom_tag) const {
+      // lammps atom types go from 1 to N, so we map it to rascal atom types
+      // by mapping 0 to N-1 to the correspoinding number
       return this->atom_types[this->type[this->get_atom_index(atom_tag)]-1];
     }
 
@@ -178,7 +180,6 @@ namespace rascal {
                     "this implementation only handles atoms and identify its "
                     "index-th neighbour.");
       auto && i_atom_id{cluster.back()};
-      //return this->atom_ghost_tag[this->firstneigh[std::move(i_atom_id)][index]];
       return this->firstneigh[std::move(i_atom_id)][index];
     }
 
@@ -258,9 +259,9 @@ namespace rascal {
       return shared_from_this();
     }
 
-    int inum{};           //!< total numer of atoms TODO(alex) could this be just the next number of the atom? so the total number of atoms is inum-1
+    int inum{};           //!< total numer of atoms 
     int tot_num{};        //!< total number, includes ghosts
-    int * ilist{};        //!< lammps atomic indices / rascal atom tags
+    int * ilist{};        //!< lammps atomic indices / rascal atom tags, size is inum if lammps ghost flag is turned off which is default other wise size is tot_num
     int * numneigh{};     //!< number of neighbours per atom
     int ** firstneigh{};  //!< pointer to first neighbour
     double ** x{};        //!< atomic positions
@@ -270,11 +271,10 @@ namespace rascal {
     double ** vatom{};    //!< virial stress of atoms
     int nb_pairs{};       //! number of clusters with cluster_size=2 (pairs)
     std::vector<int> atom_types{}; //!< lammps atom types to rascal, used as atom_types[type[atom_tag]-1]
-    //int * atom_ghost_tag{};     //!< atom tags (in lammps words: atom ids) corresponding to the atom in the cell
     std::vector<int> atom_tag_list{};  //! stores i-atom and ghost atom tags
     std::vector<int> offsets{};  //! offset per atom to access neighbour list
 
-    // the inverse mapping from the lammps atom index / atom tag (stored in ilist) to rascal atom index
+    // works as in adatpor neighbour list
     std::vector<size_t> atom_index_from_atom_tag_list{};
 
    private:

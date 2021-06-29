@@ -757,7 +757,6 @@ namespace rascal {
      * index in a list in sequence of atoms.  List of atom tags which have a
      * correpsonding cluster index of order 1.  If ghost atoms have been added
      * they have their own new index.
-     *
      */
     std::vector<size_t> atom_index_from_atom_tag_list{};
 

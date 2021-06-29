@@ -2205,7 +2205,6 @@ namespace rascal {
     expansions_coefficients.clear();
     expansions_coefficients.set_shape(n_row, n_col);
     if (compute_gradients) {
-      // TODO(alex) should not be commented out, only for debugging
       expansions_coefficients_gradient.clear();
       // Row-major ordering, so the Cartesian (spatial) index varies slowest
       expansions_coefficients_gradient.set_shape(ThreeD * n_row, n_col);
