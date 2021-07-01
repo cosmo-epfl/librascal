@@ -311,12 +311,20 @@ namespace rascal {
       // correspond to a ghost atom while the tag of atom_j always correspond to
       // an atom in the unit cell.
       // the additional check is to make sure atom_j is not a masked atom.
+
+      // TODO(alex) put back after debugging
       auto atom_j_tag = cluster.get_atom_tag();
       auto atom_j_index = this->get_atom_index(atom_j_tag);
       auto atom_j_it = this->get_iterator_at(atom_j_index, 0);
       auto atom_j = *(atom_j_it);
-      return (atom_j_tag == atom_j.get_atom_tag() and
-              atom_j.get_cluster_index(Layer) < this->size());
+      auto atom_j_tag_r = atom_j.get_atom_tag();
+      auto cluster_index = atom_j.get_cluster_index(Layer);
+      //std::cout << "atom_j_tag " << atom_j_tag << std::endl;
+      //std::cout << "atom_j_tag_r " << atom_j_tag_r << std::endl; // <- valgrind complains, it is uninitialized
+      //std::cout << "cluster_index " << cluster_index << std::endl; 
+      //std::cout << "this->size() " << this->size() << std::endl; 
+      return (atom_j_tag == atom_j_tag_r and
+              cluster_index < this->size());
     }
 
     //! number of atoms including ghosts

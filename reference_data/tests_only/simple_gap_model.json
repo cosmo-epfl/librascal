@@ -5122,24 +5122,36 @@
           "data": {},
           "init_params": {
             "compute_gradients": true,
+            "cutoff_function": {
+              "cutoff": {"unit": "AA", "value": 7.5},
+              "exponent": {"unit": "AA", "value": 4},
+              "rate": {"unit": "AA", "value": 1},
+              "scale": {"unit": "AA", "value": 4.5},
+              "smooth_width": {"unit": "AA", "value": 0.5},
+              "type": "RadialScaling"
+            },
             "cutoff_function_parameters": {
               "exponent": 4,
               "rate": 1,
               "scale": 4.5
             },
-            "cutoff_function_type": "RadialScaling",
-            "cutoff_smooth_width": 0.5,
             "expansion_by_species_method": "environment wise",
-            "gaussian_sigma_constant": 0.5,
-            "gaussian_sigma_type": "Constant",
+            "gaussian_density": {
+              "gaussian_sigma": {
+                "unit": "AA",
+                "value": 0.5
+              },
+              "type": "Constant"
+            },
             "global_species": [],
-            "interaction_cutoff": 7.5,
             "inversion_symmetry": true,
             "max_angular": 2,
             "max_radial": 4,
             "normalize": true,
-            "optimization": {},
-            "radial_basis": "GTO",
+            "radial_contribution": {
+              "optimization": {},
+              "type": "GTO"
+            },
             "soap_type": "PowerSpectrum"
           },
           "module_name": "rascal.representations.spherical_invariants",

@@ -139,9 +139,10 @@ void SphericalHarmonics::calc(
   if (std::abs((direction[0] * direction[0] + direction[1] * direction[1] +
                 direction[2] * direction[2]) -
                1.0) > math::DBL_FTOL) {
-    std::cerr << "Warning: SphericalHarmonics::calc()";
-    std::cerr << ": Direction vector unnormalized, normalizing it now";
-    std::cerr << std::endl;
+    // TODO(alex) this happens a lot during in lammps, need to figure out why
+    //std::cerr << "Warning: SphericalHarmonics::calc()";
+    //std::cerr << ": Direction vector unnormalized, normalizing it now";
+    //std::cerr << std::endl;
     direction_normed = direction / direction.norm();
   } else {
     direction_normed = direction;
