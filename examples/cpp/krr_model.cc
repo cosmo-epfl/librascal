@@ -131,6 +131,16 @@ int main(int argc, char * argv[]) {
   // compute repr
   calculator.compute(managers);
 
+  for (auto manager : managers) {
+    auto && expansions_coefficients{*manager->template get_property<Calculator_t::template Property_t<Manager_t>>(
+      calculator.get_name())};
+                                                                                                        
+    for (auto atom : manager) {                                                                         
+      std::cout << expansions_coefficients[atom].get_full_vector().transpose() << std::endl;
+    }   
+  }
+
+
   // predict gradient, stress
   
   // manual
@@ -141,39 +151,40 @@ int main(int argc, char * argv[]) {
   //std::cout << "gradients_k shape: " << gradients_k.rows() << ", " << gradients_k.cols() << std::endl; 
   math::Matrix_t KNM{kernel.compute(calculator, managers, sparse_points)};
   math::Matrix_t energies = KNM * weights.transpose();
+  std::cout << energies.transpose() << std::endl;
 
-  std::string force_name = compute_sparse_kernel_gradients(
-          calculator, kernel, managers, sparse_points, weights);
+  //std::string force_name = compute_sparse_kernel_gradients(
+  //        calculator, kernel, managers, sparse_points, weights);
 
-  std::string neg_stress_name = compute_sparse_kernel_neg_stress(
-      calculator, kernel, managers, sparse_points, weights);
+  //std::string neg_stress_name = compute_sparse_kernel_neg_stress(
+  //    calculator, kernel, managers, sparse_points, weights);
 
-  size_t i_center{0};
-  for (auto manager : managers) {
-    math::Matrix_t ee =
-        energies.block(i_center, 0, 1, 1);
-    std::cout << "ee shape: " << ee.rows() << ", " << ee.cols() << std::endl; 
+  //size_t i_center{0};
+  //for (auto manager : managers) {
+  //  math::Matrix_t ee =
+  //      energies.block(i_center, 0, 1, 1);
+  //  std::cout << "ee shape: " << ee.rows() << ", " << ee.cols() << std::endl; 
  
-    auto && gradients{*manager->template get_property<
-        Property<double, 1, Manager_t, 1, ThreeD>>(force_name, true)};
-    math::Matrix_t ff = Eigen::Map<const math::Matrix_t>(
-        gradients.view().data(), manager->size() * ThreeD, 1);
-    std::cout << "ff shape: " << ff.rows() << ", " << ff.cols() << std::endl; 
+  //  auto && gradients{*manager->template get_property<
+  //      Property<double, 1, Manager_t, 1, ThreeD>>(force_name, true)};
+  //  math::Matrix_t ff = Eigen::Map<const math::Matrix_t>(
+  //      gradients.view().data(), manager->size() * ThreeD, 1);
+  //  std::cout << "ff shape: " << ff.rows() << ", " << ff.cols() << std::endl; 
 
-    auto && neg_stress{
-        *manager->template get_property<Property<double, 0, Manager_t, 6>>(
-            neg_stress_name, true)};
-    math::Matrix_t ff_stress =
-       Eigen::Map<const math::Matrix_t>(neg_stress.view().data(), 6, 1);
-    std::cout << "ff_stress shape: " << ff_stress.rows() << ", " << ff_stress.cols() << std::endl; 
+  //  auto && neg_stress{
+  //      *manager->template get_property<Property<double, 0, Manager_t, 6>>(
+  //          neg_stress_name, true)};
+  //  math::Matrix_t ff_stress =
+  //     Eigen::Map<const math::Matrix_t>(neg_stress.view().data(), 6, 1);
+  //  std::cout << "ff_stress shape: " << ff_stress.rows() << ", " << ff_stress.cols() << std::endl; 
 
-    i_center += manager->size() * ThreeD;
-  }
+  //  i_center += manager->size() * ThreeD;
+  //}
 
-  for (auto manager : managers) {
-    for (auto atom : manager->with_ghosts()) {
-      std::cout << "atom " << atom.get_atom_tag() << " global index "
-                << atom.get_global_index() << std::endl;
-    }
-  }
+  //for (auto manager : managers) {
+  //  for (auto atom : manager->with_ghosts()) {
+  //    std::cout << "atom " << atom.get_atom_tag() << " global index "
+  //              << atom.get_global_index() << std::endl;
+  //  }
+  //}
 }

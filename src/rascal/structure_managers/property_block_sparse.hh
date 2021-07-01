@@ -804,7 +804,7 @@ namespace rascal {
     void clear() {
       // this->values.resize(0);
       if (!this->maps.empty()) {
-        for (int i{0}; i < this->maps.size(); i++) {
+        for (size_t i{0}; i < this->maps.size(); i++) {
           this->maps.at(i).clear();
         }
         this->maps.clear();
