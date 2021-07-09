@@ -172,5 +172,6 @@
                 "bias_weight": 16840.8752
             }
         ]
-    ]
+    ],
+    "comment": "example input file for defining the hyper parameters in a Behler-Parinello style Neural Network potential"
 }

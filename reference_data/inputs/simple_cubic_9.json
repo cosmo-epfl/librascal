@@ -16,7 +16,8 @@
         [1.5, 1.5, 1.8]
     ],
     "unique_id": "abcdef",
-    "user": "markus"},
+    "user": "markus",
+    "comment": "custom structure with 9 atoms and simple geometry for testing neighbourlists"},
  "ids": [1],
  "nextid": 2
 }

@@ -46,6 +46,8 @@
      [8.69635908, -22.91214366, 47.04070713],
      [3.47854363, -24.48756343, 49.71844700]],
     "unique_id": "a0ias0d",
-    "user": "markus stricker"},
-    "ids": [1],
-    "nextid": 2}
+    "user": "markus stricker",
+    "comment": "hcp Magnesium structure from a stacking fault calculation"},
+ "ids": [1],
+ "nextid": 2
+}

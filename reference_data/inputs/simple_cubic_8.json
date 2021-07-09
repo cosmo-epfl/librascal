@@ -13,7 +13,9 @@
         [1.5, 0.5, 1.5],
         [0.5, 1.5, 1.5],
         [1.5, 1.5, 1.8]
-    ]
-},
-"ids": [1],
-"nextid": 2}
+    ],
+    "user": "markus",
+    "comment": "custom structure with simple geometry for testing neighbourlists"},
+ "ids": [1],
+ "nextid": 2
+}

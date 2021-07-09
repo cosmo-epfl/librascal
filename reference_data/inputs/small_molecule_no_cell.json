@@ -96,5 +96,7 @@
   "ids": [
     0
   ],
+  "user": "musil",
+  "comment": "molecule taken from the QM9 dataset",
   "nextid": 2
 }
