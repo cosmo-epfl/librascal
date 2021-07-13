@@ -186,14 +186,24 @@ void SphericalHarmonics::calc(
 
 void SphericalHarmonics::compute_cos_sin_angle_multiples(double cos_phi,
                                                          double sin_phi) {
+  // computes iteratively a list of (cos(m phi), sin(m phi))
+  // uses a modified iteration that yields (-1)^m(cos(m phi), sin(m phi)),
+  // that has the right sign to get real-valued sph with the usual
+  // phase convention
   for (size_t m_count{0}; m_count < this->max_angular + 1; m_count++) {
     if (m_count == 0) {
       this->cos_sin_m_phi.row(m_count) << 1.0, 0.0;
     } else if (m_count == 1) {
-      this->cos_sin_m_phi.row(m_count) << cos_phi, sin_phi;
+      // standard iter: this->cos_sin_m_phi.row(m_count) << cos_phi, sin_phi;
+      this->cos_sin_m_phi.row(m_count) << -cos_phi, -sin_phi;
     } else {
+      /* standard iter:
       this->cos_sin_m_phi.row(m_count) =
           2.0 * cos_phi * this->cos_sin_m_phi.row(m_count - 1) -
+          this->cos_sin_m_phi.row(m_count - 2);
+      */
+      this->cos_sin_m_phi.row(m_count) =
+          -2.0 * cos_phi * this->cos_sin_m_phi.row(m_count - 1) -
           this->cos_sin_m_phi.row(m_count - 2);
     }
   }

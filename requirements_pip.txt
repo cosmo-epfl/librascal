@@ -3,3 +3,4 @@ numpy>=1.16.0
 scipy>=1.2.0
 matplotlib>=2.0.0
 ase>=3.19.0
+sympy>=1.4

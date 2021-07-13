@@ -38,22 +38,27 @@ namespace rascal {
      * Compute a full set of spherical harmonics (optimized version)
      *
      * Follows the algorithm described in https://arxiv.org/abs/1410.1748
+     * except for an additonal \f$(-1)^m\f$ factor to follow the wikipedia
+     * article convention
+     * https://en.wikipedia.org/wiki/Spherical_harmonics#Real_form.
+     * It effectively cancels out the Condon-Shortley phase in the final
+     * real spherical harmonics.
      *
-     * In brief, this class computes the real spherical harmonics including
-     * the Condon-Shortley phase where the imaginary components of the usual
-     * complex functions are instead stored in the negative-m indices:
+     * In brief, this class computes the real spherical harmonics where the
+     * imaginary components of the usualn complex functions are instead stored
+     * in the negative-m indices:
      *
      * \f{equation}{
      * Y_\ell^m(\theta, \phi) =
      * \begin{cases}
      * \sqrt{\frac{2\ell + 1}{2\pi} \frac{(\ell + m)!}{(\ell - m)!}}
-     *      P_\ell^{-m}(\cos\theta) \sin(-m\phi) & \text{for } m < 0\\
+     *     P_\ell^{-m}(\cos\theta) (-1)^m \sin(-m\phi) & \text{for } m < 0\\
      * \sqrt{\frac{2\ell + 1}{4\pi}} P_\ell(\cos\theta) & \text{for } m = 0\\
      * \sqrt{\frac{2\ell + 1}{2\pi} \frac{(\ell - m)!}{(\ell + m)!}}
-     *      P_\ell^{m}(\cos\theta) \cos(m\phi) & \text{for } m > 0
+     *      P_\ell^{m}(\cos\theta) (-1)^m \cos(m\phi) & \text{for } m > 0
      * \end{cases}
      * \f}
-     *
+     * Note that \f$P_\ell^{m}\f$ includes the Condon-Shortley phase.
      * In case you're wondering why it's \f$\frac{1}{2π}\f$ on the \f$m \neq
      * 0\f$ components (instead of \f$\frac{1}{4π}\f$), there's an extra factor
      * of 1/2 that comes from integrating cos² or sin² over the full circle of
@@ -184,12 +189,15 @@ namespace rascal {
 
      private:
       /**
-       * Compute a set of normalized associated Legendre polynomials
+       * Compute a set of normalized associated Legendre polynomials, namely
+       * \f$P_\ell^{m}\f$.
        *
        * These are normalized for use in computing the real spherical harmonics;
        * see the class documentation for details.  In particular, the \f$m=0\f$
        * harmonics require an extra factor of \f$\frac{1}{\sqrt{2}}\f$.  The
        * negative-m functions are not computed due to symmetry.
+       *
+       * Note that \f$P_\ell^{m}\f$ includes the Condon-Shortley phase.
        *
        * @param cos_theta (aka x) Where to evaluate the polynomial
        *
@@ -201,8 +209,8 @@ namespace rascal {
       void compute_assoc_legendre_polynom(double cos_theta);
 
       /**
-       * Compute \f$\cos(m\phi)\f$ and \f$\sin(m\phi)\f$ from the recurrence
-       * relations
+       * Compute \f$(-1)^m\cos(m\phi)\f$ and \f$(-1)^m\sin(m\phi)\f$ from the
+       * recurrence relations
        *
        * The relations are (these are the same recurrence relations used to
        * calculate the Chebyshev polynomials):
@@ -219,9 +227,9 @@ namespace rascal {
        * @param sin_phi Value of \f$\sin(\phi)\f$ to start the relation
        *
        * Stores the results as an (Eigen)matrix, sized \f$m_\text{max}\f$ by 2
-       * with the \f$\cos(m\phi)\f$ stored in the first column and
-       * \f$\sin(m\phi)\f$ in the second column, with \f$m\f$ being the row
-       * index
+       * with the \f$(-1)^m\cos(m\phi)\f$ stored in the first column and
+       * \f$(-1)^m\sin(m\phi)\f$ in the second column, with \f$m\f$ being the
+       * row index
        */
       void compute_cos_sin_angle_multiples(double cos_phi, double sin_phi);
 

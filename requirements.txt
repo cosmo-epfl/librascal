@@ -2,6 +2,7 @@
 numpy
 scipy
 jupyter
+sympy>=1.4
 # notebook tutorials
 matplotlib
 #qml

@@ -14,7 +14,7 @@ from functools import reduce
 
 root = os.path.abspath("../")
 rascal_reference_path = os.path.join(root, "reference_data/")
-inputs_path = os.path.join(rascal_reference_path, "inputs")
+inputs_path = os.path.join(rascal_reference_path, "tests_only")
 dump_path = os.path.join("reference_data/", "tests_only")
 
 
@@ -41,12 +41,14 @@ def get_ascending_angular_lists(max_angular_l):
 
 # scipy alreay includes the Condon-Shortley phase, therefore to calculate the
 # real form we use
-#         ╭ √2 Im[Y_l^|m|] for m<0
+#         ╭ (-1)^|m| √2 Im[Y_l^|m|] for m<0
 #         |
 # Y_l^m = ┤     Y_l^0      for m==0
 #         |
-#         ╰ √2 Re[Y_l^m]   for m<0
+#         ╰ (-1)^m √2 Re[Y_l^m]   for m<0
 # where Y_l^m is the output of the spherical harmonics function of scipy
+#  following the definition in
+# https://en.wikipedia.org/wiki/Spherical_harmonics#Real_form
 
 
 def dump_reference_json():
@@ -71,7 +73,6 @@ def dump_reference_json():
     alp_normfacts = np.zeros((l_max + 1, l_max + 1))
     for l in range(l_max + 1):
         for m in range(l + 1):
-
             alp_normfacts[l, m] = mpmath.sqrt(
                 (2 * l + 1)
                 / (2 * mpmath.pi)
@@ -102,7 +103,9 @@ def dump_reference_json():
 
             # calculation for negative m
             for m in range(-l, 0):
-                result = np.sqrt(2) * np.imag(sph_harm(np.abs(m), l, phi, theta))
+                result = (
+                    (-1) ** m * np.sqrt(2) * np.imag(sph_harm(np.abs(m), l, phi, theta))
+                )
                 harmonics.append(float(result))
                 if verbose:
                     print(l, m, result)
@@ -113,19 +116,7 @@ def dump_reference_json():
                 print(l, 0, result)
             # calculation for positive m
             for m in range(1, l + 1):
-                result = np.sqrt(2) * np.real(sph_harm(m, l, phi, theta))
-                harmonics.append(float(result))
-                if verbose:
-                    print(l, m, result)
-
-        # Calculating the associated legendre polynomial
-
-        # copy of c++ code:
-        # double cos_theta = unit_vector[2];
-        cos_theta = unit_vector[2]
-        alps = lpmn(l_max, l_max, cos_theta)[0].T
-        if verbose:
-            print("lpmn")
+                result = (-1) ** m * np.sqrt(2) * np.real(sph_harm(m, l, phi, theta))
             print(alps)
         alps *= alp_normfacts
         if verbose:
