@@ -16,9 +16,9 @@ from python_representation_calculator_test import (
 )
 from python_models_test import TestNumericalKernelGradient, TestCosineKernel
 from python_math_test import TestMath
-from python_test_sparsify_fps import TestFPS
 from python_utils_test import TestOptimalRadialBasis
 from md_calculator_test import TestGenericMD
+from test_filter import CURTest
 
 
 class SimpleCheck(unittest.TestCase):
