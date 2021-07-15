@@ -1,0 +1,37 @@
+{
+    "description": "Example fit of a SOAP-GAP model with energies and forces from an XYZ file",
+    "structure_filename": "yourfile.xyz",
+    "units": {"energy": "eV",
+              "length": "AA"},
+    "structure_subset": ":50",
+    "soap_hypers": {
+        "soap_type": "PowerSpectrum",
+        "interaction_cutoff": 5.5,
+        "cutoff_smooth_width": 0.5,
+        "cutoff_function_type": "RadialScaling",
+        "cutoff_function_parameters": {
+            "rate": 1,
+            "scale": 3.5,
+            "exponent": 4
+        },
+        "max_radial": 8,
+        "max_angular": 6,
+        "gaussian_sigma_type": "Constant",
+        "gaussian_sigma_constant": 0.5,
+        "radial_basis": "GTO",
+        "normalize": true,
+        "compute_gradients": true
+    },
+    "n_sparse": {"1": 100, "6": 250, "8": 250},
+    "soap_power": 4,
+    "atom_energy_baseline": -9000.1,
+    "energy_delta": 1.0,
+    "energy_regularizer": 0.01,
+    "force_regularizer": 0.1,
+    "energy_parameter_name": "energy",
+    "force_parameter_name": "forces",
+    "working_directory": "gapfit_example",
+    "output_filename": "gap_model.json",
+    "warning.memory_required": "lots",
+    "warning.time_required": "not too long"
+}
