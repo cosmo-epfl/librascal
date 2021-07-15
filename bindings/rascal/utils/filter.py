@@ -201,31 +201,31 @@ def convert_selected_global_index2perstructure_index(
 
 class Filter(BaseIO):
     """
-        A super class for filtering representations based upon a standard
-        sample or feature selection class.
+    A super class for filtering representations based upon a standard
+    sample or feature selection class.
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        representation : Calculator
-            Representation calculator associated with the kernel
+    representation : Calculator
+        Representation calculator associated with the kernel
 
-        Nselect: int
-            number of points to select. if act_on='sample per species' then it should
-            be a dictionary mapping atom type to the number of samples, e.g.
-            Nselect = {1:200,6:100,8:50}.
+    Nselect: int
+        number of points to select. if act_on='sample per species' then it should
+        be a dictionary mapping atom type to the number of samples, e.g.
+        Nselect = {1:200,6:100,8:50}.
 
-        act_on: string
-            Select how to apply the selection. Can be either of 'sample',
-            'sample per species','feature'.
-            For the moment only 'sample per species' is implemented.
+    act_on: string
+        Select how to apply the selection. Can be either of 'sample',
+        'sample per species','feature'.
+        For the moment only 'sample per species' is implemented.
 
-        selector: selector to use for filter ing. The selector should
-                have a `fit` function, which when called will select from the input
-                matrix the desired features / samples and a `get_support` function
-                which takes parameters `indices` and `ordered`, and returns a list
-                of selection indices, in the order that they were selected,
-                when `indices=True` and `ordered=True`.
+    selector: selector to use for filter ing. The selector should
+            have a `fit` function, which when called will select from the input
+            matrix the desired features / samples and a `get_support` function
+            which takes parameters `indices` and `ordered`, and returns a list
+            of selection indices, in the order that they were selected,
+            when `indices=True` and `ordered=True`.
     """
 
     def __init__(
@@ -262,15 +262,15 @@ class Filter(BaseIO):
     def select(self, managers):
         """Perform selection of samples/features.
 
-           Parameters
-           ----------
-           managers : AtomsList
-               list of structures containing features computed with representation
+        Parameters
+        ----------
+        managers : AtomsList
+            list of structures containing features computed with representation
 
-           Returns
-           -------
-           SparsePoints
-               Selected samples
+        Returns
+        -------
+        SparsePoints
+            Selected samples
 
         """
 
@@ -305,37 +305,52 @@ class Filter(BaseIO):
 
             for sp in sps:
                 print("Selecting species: {}".format(sp))
-                self._selector.fit(X_by_sp[sp])
-                self.selected_sample_ids_by_sp[sp] = self._selector.get_support(indices=True, ordered=True)
-                self._add_extra_params(self._selector, sp)
+                if self._selector[sp] is not None:
+                    self._selector[sp].fit(X_by_sp[sp])
+
+                    in_sample_indices = np.array(
+                        self._selector[sp].get_support(indices=True, ordered=True),
+                        dtype=int,
+                    )
+                    self.selected_sample_ids_by_sp[sp] = in_sample_indices
+                else:
+                    self.selected_sample_ids_by_sp[sp] = []
+
             return self
 
-        self._selector.fit(X, selection_type=self.act_on)
-        self._add_extra_params(self._selector)
-        if self.act_on == "sample":
-            self.selected_sample_ids_by_sp = self._selector.get_support(indices=True, ordered=True)
         else:
-            self.selected_feature_ids_global = self._selector.get_support(indices=True, ordered=True)
+            self._selector.fit(X)
+
+            if self.act_on == "sample":
+                self.selected_sample_ids = self._selector.get_support(
+                    indices=True, ordered=True
+                )
+            else:
+                self.selected_feature_ids_global = self._selector.get_support(
+                    indices=True, ordered=True
+                )
+
+            return self
 
     def filter(self, managers, n_select=None):
-        """ Apply the fitted selection to a new set of managers
+        """Apply the fitted selection to a new set of managers
 
-            Parameters
-            ----------
-            managers : AtomsList
-                list of structures containing features computed with representation
+        Parameters
+        ----------
+        managers : AtomsList
+            list of structures containing features computed with representation
 
-            n_select : int
-                number of selections to return, must be less than self.Nselect
+        n_select : int
+            number of selections to return, must be less than self.Nselect
 
-            Returns
-            -------
-            SparsePoints
-                Selected samples
+        Returns
+        -------
+        SparsePoints
+            Selected samples
 
-            Raises
-            ------
-            ValueError
+        Raises
+        ------
+        ValueError
 
         """
 
@@ -344,8 +359,10 @@ class Filter(BaseIO):
 
         else:
             if n_select > self.Nselect:
-                raise ValueError(f"It is only possible to filter {self.Nselect} {self.act_on}, "
-                                 f"you have requested {n_select}")
+                raise ValueError(
+                    f"It is only possible to filter {self.Nselect} {self.act_on}, "
+                    f"you have requested {n_select}"
+                )
 
         if self.act_on == "sample per species":
             sps = list(n_select.keys())
@@ -407,10 +424,10 @@ class Filter(BaseIO):
                     self.selected_ids[key].append(int(coef_idx[key]))
             # keep the global indices and ordering for ease of use
             self.selected_ids[
-                "selected_features_global_ids"
+                "selected_feature_ids_global"
             ] = selected_feature_ids.tolist()
             self.selected_ids[
-                "selected_features_global_ids_fps_ordering"
+                "selected_feature_ids_global_selection_ordering"
             ] = selected_ids_sorting.tolist()
             self.selected_ids = dict(coefficient_subselection=self.selected_ids)
             return self.selected_ids
@@ -449,28 +466,32 @@ class CURFilter(Filter):
         selector_args={},
         **kwargs,
     ):
-        if act_on in ["sample", "sample_by_species"]:
+        if act_on == "sample":
             selector = _CUR(
                 selection_type="sample", n_to_select=Nselect, **selector_args
             )
+        elif act_on == "sample per species":
+            selector = {
+                n: _CUR(
+                    selection_type="sample", n_to_select=Nselect[n], **selector_args
+                )
+                if Nselect[n] > 0
+                else None
+                for n in Nselect
+            }
+
         else:
             selector = _CUR(
                 selection_type="feature", n_to_select=Nselect, **selector_args
             )
 
-        super().__init__(selector=selector, **kwargs)
-
-    def _add_extra_params(self, selector, species=None):
-        """Store any additional parameters from the selector that may be of
-        use in later analysis
-
-        Parameters
-        ----------
-        selector : CUR-type selector, which has been fitted
-        species : in the case that mode == 'sample per species', which species
-                 to store the parameters for
-        """
-        pass
+        super().__init__(
+            representation=representation,
+            Nselect=Nselect,
+            act_on=act_on,
+            selector=selector,
+            **kwargs,
+        )
 
 
 class FPSFilter(Filter):
@@ -482,31 +503,29 @@ class FPSFilter(Filter):
         selector_args={},
         **kwargs,
     ):
-        if act_on in ["sample", "sample_by_species"]:
+        if act_on == "sample":
             selector = _FPS(
                 selection_type="sample", n_to_select=Nselect, **selector_args
             )
+        elif act_on == "sample per species":
+            selector = {
+                n: _FPS(
+                    selection_type="sample", n_to_select=Nselect[n], **selector_args
+                )
+                if Nselect[n] > 0
+                else None
+                for n in Nselect
+            }
+
         else:
             selector = _FPS(
                 selection_type="feature", n_to_select=Nselect, **selector_args
             )
 
-        super().__init__(selector=selector, **kwargs)
-
-    def _add_extra_params(self, selector, species=None):
-        """Store any additional parameters from the selector that may be of
-        use in later analysis
-
-        Parameters
-        ----------
-        selector : FPS-type selector, which has been fitted
-        species : in the case that mode == 'sample per species', which species
-                 to store the parameters for
-        """
-        if species is None:
-            self.fps_minmax_d2 = selector.get_select_distance()
-        else:
-            if not hasattr(self, "fps_minmax_d2"):
-                self.fps_minmax_d2 = {}
-
-            self.fps_minmax_d2[species] = selector.get_select_distance()
+        super().__init__(
+            representation=representation,
+            Nselect=Nselect,
+            act_on=act_on,
+            selector=selector,
+            **kwargs,
+        )
