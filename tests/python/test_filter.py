@@ -30,8 +30,8 @@ class FilterTest:
         self.example_frames = example_frames
 
     def test_sps_mode(self):
-        """ This test checks that `sample per species` mode returns the correct
-            number of selected samples per each species
+        """This test checks that `sample per species` mode returns the correct
+        number of selected samples per each species
         """
         n_sparses = {1: 0, 6: 2, 7: 4, 8: 1}
         compressor = self._filter(self.repr, n_sparses, act_on="sample per species")
@@ -47,8 +47,8 @@ class FilterTest:
             self.assertEqual(len(sp_idx), n_sparses[sp])
 
     def test_sample_mode(self):
-        """ This test checks that `sample` mode returns the correct
-            number of selected samples
+        """This test checks that `sample` mode returns the correct
+        number of selected samples
         """
         n_sparses = self.example_features.shape[0] // 10
         compressor = self._filter(self.repr, n_sparses, act_on="sample")
@@ -63,8 +63,8 @@ class FilterTest:
         self.assertEqual(idx.shape[0], n_sparses)
 
     def test_feature_mode(self):
-        """ This test checks that `feature` mode returns the correct
-            number of selected feature
+        """This test checks that `feature` mode returns the correct
+        number of selected feature
         """
         n_sparses = self.example_features.shape[1] // 100
         compressor = self._filter(self.repr, n_sparses, act_on="feature")
@@ -79,8 +79,8 @@ class FilterTest:
         self.assertTrue(compressor.selected_sample_ids_by_sp is None)
 
     def test_missing_species(self):
-        """ This test checks that asking for a species which is not present
-            raises an error.
+        """This test checks that asking for a species which is not present
+        raises an error.
         """
         n_sparses = {1: 0, 6: 2, 7: 4, 8: 1, 12: 3}
         compressor = self._filter(self.repr, n_sparses, act_on="sample per species")
@@ -92,8 +92,8 @@ class FilterTest:
             )
 
     def test_bad_mode(self):
-        """ This test checks that any mode other than `sample`,
-            `sample per species`, and `feature` throws an error
+        """This test checks that any mode other than `sample`,
+        `sample per species`, and `feature` throws an error
         """
         with self.assertRaises(ValueError) as cm:
             compressor = self._filter(self.repr, 1, act_on="bad mode")
@@ -103,8 +103,8 @@ class FilterTest:
             )
 
     def test_new_n(self):
-        """ This test checks that `filter` can return an arbitrary number of
-            selections strictly less than the number selected.
+        """This test checks that `filter` can return an arbitrary number of
+        selections strictly less than the number selected.
         """
         n_sparses = self.example_features.shape[1] // 100
         compressor = self._filter(self.repr, n_sparses, act_on="feature")
