@@ -1,8 +1,15 @@
+import logging
 import numpy as np
 from .io import BaseIO
 from ..models.sparse_points import SparsePoints
 
-from skcosmo._selection import _FPS, _CUR
+LOGGER = logging.getLogger(__name__)
+
+try:
+    from skcosmo._selection import _FPS, _CUR
+except ImportError as ie:
+    LOGGER.warn("Warning: skcosmo module not found. CUR and FPS filters will be unavailable.")
+    _FPS = _CUR = None
 
 # utility functions for Filters
 
