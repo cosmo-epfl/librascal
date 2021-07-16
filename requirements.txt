@@ -2,6 +2,7 @@
 numpy
 scipy
 jupyter
+skcosmo
 # notebook tutorials
 matplotlib
 #qml
